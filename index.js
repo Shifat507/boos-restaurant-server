@@ -30,6 +30,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const userCollection = client.db("bossDb").collection("users");
     const menuCollection = client.db("bossDb").collection("menu");
     const reviewCollection = client.db("bossDb").collection("reviews");
     const cartCollection = client.db("bossDb").collection("carts");
@@ -43,6 +44,25 @@ async function run() {
         const result = await reviewCollection.find().toArray();
         res.send(result);
     })    
+
+    // user related APIs:
+    app.post('/users', async(req, res)=>{
+      const user = req.body;
+      //check user is already exist or not
+      const query = {email: user.email};
+      const existingUser = await userCollection.findOne(query);
+      if(existingUser){
+        return res.send({message: 'User already exist', insertedId: null});
+      }
+
+      const result = await userCollection.insertOne(user);
+      res.send(result)
+    } )
+
+    app.get('/users', async(req, res)=>{
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    })
 
     // cartCollection
     // add to cart data
